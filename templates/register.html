@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="registration-container">
+                <!-- Progress Indicator -->
+                <div class="registration-progress">
+                    <div class="progress-steps">
+                        <div class="progress-step active" data-step="1">
+                            <span class="step-number">1</span>
+                            <span class="step-label">Personal Info</span>
+                        </div>
+                        <div class="progress-step" data-step="2">
+                            <span class="step-number">2</span>
+                            <span class="step-label">Allergens</span>
+                        </div>
+                        <div class="progress-step" data-step="3">
+                            <span class="step-number">3</span>
+                            <span class="step-label">Complete</span>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 33%"></div>
+                    </div>
+                </div>
+
+                <form method="POST" id="registrationForm">
+                    {{ form.hidden_tag() }}
+                    
+                    <!-- Step 1: Personal Information -->
+                    <div class="registration-step active" data-step="1">
+                        <div class="modern-card">
+                            <div class="card-body p-5">
+                                <div class="text-center mb-4">
+                                    <h2 class="step-title">Let's get started!</h2>
+                                    <p class="step-subtitle">Tell us a bit about yourself</p>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.first_name.label(class="form-label") }}
+                                        {{ form.first_name(class="form-control form-control-lg") }}
+                                        {% if form.first_name.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.first_name.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.last_name.label(class="form-label") }}
+                                        {{ form.last_name(class="form-control form-control-lg") }}
+                                        {% if form.last_name.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.last_name.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    {{ form.email.label(class="form-label") }}
+                                    {{ form.email(class="form-control form-control-lg") }}
+                                    {% if form.email.errors %}
+                                        <div class="text-danger small mt-1">
+                                            {% for error in form.email.errors %}
+                                                <div>{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        {{ form.password.label(class="form-label") }}
+                                        <div class="password-field">
+                                            {{ form.password(class="form-control form-control-lg") }}
+                                            <button type="button" class="password-toggle">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        {% if form.password.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.password.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        {{ form.confirm_password.label(class="form-label") }}
+                                        <div class="position-relative">
+                                            {{ form.confirm_password(class="form-control form-control-lg", id="confirm_password") }}
+                                            <button type="button" class="password-toggle" onclick="togglePassword('confirm_password', this)">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        {% if form.confirm_password.errors %}
+                                            <div class="text-danger small mt-1">
+                                                {% for error in form.confirm_password.errors %}
+                                                    <div>{{ error }}</div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="text-center">
+                                    <button type="button" class="modern-btn modern-btn-primary btn-lg px-5" onclick="nextStep()">
+                                        Continue <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Allergen Selection -->
+                    <div class="registration-step" data-step="2">
+                        <div class="modern-card">
+                            <div class="card-body p-5">
+                                <div class="text-center mb-4">
+                                    <h2 class="step-title">Select your allergens</h2>
+                                    <p class="step-subtitle">Help us keep you safe by selecting any allergens you react to</p>
+                                </div>
+                                
+                                <div class="allergen-grid">
+                                    <!-- Hidden form fields -->
+                                    <div style="display: none;">
+                                        {% for allergen in form.allergens %}
+                                            {{ allergen() }}
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <!-- Custom allergen cards -->
+                                    {% for allergen in form.allergens %}
+                                        <div class="allergen-card" data-allergen-id="{{ allergen.data }}">
+                                            <div class="allergen-icon">
+                                                {% if 'milk' in allergen.label.text.lower() or 'dairy' in allergen.label.text.lower() %}
+                                                    <i class="fas fa-glass-whiskey"></i>
+                                                {% elif 'egg' in allergen.label.text.lower() %}
+                                                    <i class="fas fa-egg"></i>
+                                                {% elif 'peanut' in allergen.label.text.lower() or 'groundnut' in allergen.label.text.lower() %}
+                                                    <i class="fas fa-seedling"></i>
+                                                {% elif 'soy' in allergen.label.text.lower() %}
+                                                    <i class="fas fa-leaf"></i>
+                                                {% elif 'wheat' in allergen.label.text.lower() or 'gluten' in allergen.label.text.lower() %}
+                                                    <i class="fas fa-bread-slice"></i>
+                                                {% elif 'fish' in allergen.label.text.lower() %}
+                                                    <i class="fas fa-fish"></i>
+                                                {% elif 'shellfish' in allergen.label.text.lower() %}
+                                                    <i class="fas fa-shrimp"></i>
+                                                {% elif 'tree nut' in allergen.label.text.lower() or 'nut' in allergen.label.text.lower() %}
+                                                    <i class="fas fa-acorn"></i>
+                                                {% elif 'sesame' in allergen.label.text.lower() %}
+                                                    <i class="fas fa-circle"></i>
+                                                {% else %}
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div class="allergen-name">{{ allergen.label.text }}</div>
+                                            <div class="allergen-check">
+                                                <i class="fas fa-check"></i>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                {% if form.allergens.errors %}
+                                    <div class="text-danger text-center mt-3">
+                                        {% for error in form.allergens.errors %}
+                                            <div>{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="text-center mt-4">
+                                    <button type="button" class="modern-btn modern-btn-secondary me-3" onclick="prevStep()">
+                                        <i class="fas fa-arrow-left me-2"></i>Back
+                                    </button>
+                                    <button type="submit" class="modern-btn modern-btn-primary btn-lg px-5">
+                                        <i class="fas fa-user-plus me-2"></i>Create Account
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-4">
+                    <p class="text-muted">Already have an account? 
+                        <a href="{{ url_for('login') }}" class="text-success text-decoration-none fw-semibold">Sign in here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let currentStep = 1;
+
+function nextStep() {
+    // Validate current step
+    if (currentStep === 1 && !validateStep1()) {
+        return;
+    }
+    
+    if (currentStep < 2) {
+        currentStep++;
+        updateStepDisplay();
+    }
+}
+
+function prevStep() {
+    if (currentStep > 1) {
+        currentStep--;
+        updateStepDisplay();
+    }
+}
+
+function updateStepDisplay() {
+    // Update progress indicators
+    document.querySelectorAll('.progress-step').forEach((step, index) => {
+        step.classList.toggle('active', index + 1 <= currentStep);
+        step.classList.toggle('completed', index + 1 < currentStep);
+    });
+    
+    // Update progress bar
+    const progressFill = document.querySelector('.progress-fill');
+    progressFill.style.width = (currentStep / 2 * 100) + '%';
+    
+    // Show/hide steps
+    document.querySelectorAll('.registration-step').forEach(step => {
+        step.classList.remove('active');
+    });
+    document.querySelector(`.registration-step[data-step="${currentStep}"]`).classList.add('active');
+}
+
+function validateStep1() {
+    const firstName = document.getElementById('first_name').value.trim();
+    const lastName = document.getElementById('last_name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirm_password').value;
+    
+    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+        alert('Please fill in all required fields.');
+        return false;
+    }
+    
+    if (password !== confirmPassword) {
+        alert('Passwords do not match.');
+        return false;
+    }
+    
+    if (password.length < 6) {
+        alert('Password must be at least 6 characters long.');
+        return false;
+    }
+    
+    return true;
+}
+
+// Allergen card selection
+document.addEventListener('DOMContentLoaded', function() {
+    const allergenCards = document.querySelectorAll('.allergen-card');
+    
+    allergenCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const allergenId = this.dataset.allergenId;
+            const checkbox = document.querySelector(`input[value="${allergenId}"]`);
+            
+            if (checkbox) {
+                checkbox.checked = !checkbox.checked;
+                this.classList.toggle('selected', checkbox.checked);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

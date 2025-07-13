@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1 class="gradient-text">Search Results</h1>
+        <p class="subtitle">Found {{ total_count }} products for "{{ search_query }}"</p>
+    </div>
+
+    <!-- Search Controls -->
+    <div class="search-controls mb-4">
+        <form method="GET" action="{{ url_for('search_results') }}" class="d-flex align-items-center gap-3">
+            <input type="hidden" name="q" value="{{ search_query }}">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="include_global" value="true" 
+                       id="includeGlobal" {% if include_global %}checked{% endif %} onchange="this.form.submit()">
+                <label class="form-check-label" for="includeGlobal">
+                    <i class="fas fa-globe text-primary"></i> Include global products
+                </label>
+            </div>
+            <small class="text-muted">
+                Sources: {{ sources | join(', ') | title }}
+            </small>
+        </form>
+    </div>
+
+    <!-- Nigerian Products Section -->
+    {% if local_products %}
+    <div class="results-section mb-5">
+        <h2 class="section-title">
+            <i class="fas fa-flag text-success"></i>
+            Nigerian Products ({{ local_products|length }})
+        </h2>
+        
+        <div class="row">
+            {% for product in local_products %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card product-card h-100">
+                    <div class="card-body">
+                        <!-- Safety Badge -->
+                        {% if current_user.is_authenticated and not current_user.is_admin %}
+                            {% if product.safety_status == 'safe' %}
+                                <span class="badge bg-success position-absolute top-0 end-0 m-2">
+                                    <i class="fas fa-check"></i> Safe
+                                </span>
+                            {% elif product.safety_status == 'warning' %}
+                                <span class="badge bg-warning position-absolute top-0 end-0 m-2">
+                                    <i class="fas fa-exclamation-triangle"></i> Contains Allergens
+                                </span>
+                            {% endif %}
+                        {% endif %}
+                        
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-industry"></i> {{ product.manufacturer }}
+                        </p>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-tag"></i> {{ product.category }}
+                        </p>
+                        <p class="text-muted mb-3">
+                            <i class="fas fa-certificate"></i> {{ product.nafdac_number }}
+                        </p>
+                        
+                        {% if product.description %}
+                        <p class="card-text">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                        {% endif %}
+                        
+                        <div class="mt-auto">
+                            <a href="{{ url_for('product_detail', product_id=product.id) }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-info-circle"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Open Food Facts Products Section -->
+    {% if off_products %}
+    <div class="results-section mb-5">
+        <h2 class="section-title">
+            <i class="fas fa-globe text-info"></i>
+            Global Products ({{ off_products|length }})
+            <small class="text-muted">from Open Food Facts</small>
+        </h2>
+        
+        <div class="row">
+            {% for product in off_products %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card product-card h-100 border-info">
+                    <div class="card-body">
+                        <!-- Safety Badge -->
+                        {% if current_user.is_authenticated and not current_user.is_admin %}
+                            {% if product.safety_status == 'safe' %}
+                                <span class="badge bg-success position-absolute top-0 end-0 m-2">
+                                    <i class="fas fa-check"></i> Safe
+                                </span>
+                            {% elif product.safety_status == 'warning' %}
+                                <span class="badge bg-warning position-absolute top-0 end-0 m-2">
+                                    <i class="fas fa-exclamation-triangle"></i> Contains Allergens
+                                </span>
+                            {% endif %}
+                        {% endif %}
+                        
+                        <!-- Global Product Badge -->
+                        <span class="badge bg-info position-absolute top-0 start-0 m-2">
+                            <i class="fas fa-globe"></i> Global
+                        </span>
+                        
+                        <h5 class="card-title mt-3">{{ product.name }}</h5>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-industry"></i> {{ product.manufacturer }}
+                        </p>
+                        <p class="text-muted mb-2">
+                            <i class="fas fa-tag"></i> {{ product.category }}
+                        </p>
+                        {% if product.barcode %}
+                        <p class="text-muted mb-3">
+                            <i class="fas fa-barcode"></i> {{ product.barcode }}
+                        </p>
+                        {% endif %}
+                        
+                        {% if product.description %}
+                        <p class="card-text">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                        {% endif %}
+                        
+                        <!-- Ingredients Preview -->
+                        {% if product.ingredients and product.ingredients != 'Ingredients not available' %}
+                        <div class="ingredients-preview">
+                            <small class="text-muted">
+                                <strong>Ingredients:</strong> {{ product.ingredients[:80] }}{% if product.ingredients|length > 80 %}...{% endif %}
+                            </small>
+                        </div>
+                        {% elif product.ingredients == 'Ingredients not available' %}
+                        <div class="ingredients-preview">
+                            <small class="text-warning">
+                                <i class="fas fa-exclamation-triangle"></i> <strong>Ingredients not available</strong> - Cannot verify allergens
+                            </small>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mt-auto pt-3">
+                            <button class="btn btn-outline-info btn-sm me-2" onclick="showProductDetails('{{ product.barcode }}', '{{ product.name }}', '{{ product.ingredients }}')">
+                                <i class="fas fa-info-circle"></i> View Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- No Results -->
+    {% if not local_products and not off_products %}
+    <div class="no-results text-center py-5">
+        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+        <h3>No Products Found</h3>
+        <p class="text-muted">Try searching with different keywords or enable global search</p>
+        <a href="{{ url_for('search') }}" class="btn btn-primary">
+            <i class="fas fa-arrow-left"></i> Back to Search
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Back to Search -->
+    <div class="text-center mt-4">
+        <a href="{{ url_for('search') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> New Search
+        </a>
+    </div>
+</div>
+
+<!-- Product Details Modal for Global Products -->
+<div class="modal fade" id="productDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Product Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="productDetailsContent">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showProductDetails(barcode, name, ingredients) {
+    const modal = new bootstrap.Modal(document.getElementById('productDetailsModal'));
+    const content = document.getElementById('productDetailsContent');
+    
+    content.innerHTML = `
+        <h4>${name}</h4>
+        ${barcode ? `<p><strong>Barcode:</strong> ${barcode}</p>` : ''}
+        ${ingredients ? `
+            <div class="mt-3">
+                <h6>Ingredients:</h6>
+                <p class="ingredients-text">${ingredients}</p>
+            </div>
+        ` : ''}
+        <div class="alert alert-info mt-3">
+            <i class="fas fa-info-circle"></i>
+            This product is from the Open Food Facts global database. 
+            For the most accurate allergen information, please verify with the product packaging.
+        </div>
+    `;
+    
+    modal.show();
+}
+</script>
+
+<style>
+.product-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.product-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.results-section {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 2rem;
+}
+
+.section-title {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.search-controls {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.ingredients-preview {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.ingredients-text {
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.no-results {
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+</style>
+{% endblock %}

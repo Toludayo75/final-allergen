@@ -1,0 +1,38 @@
+nigerian-allergen-app/
+├── app.py                          # Flask app setup
+├── main.py                         # Entry point
+├── models.py                       # Database models
+├── routes.py                       # All route handlers
+├── forms.py                        # WTForms
+├── seed_data.py                    # Database seeding (250 products)
+├── utils.py                        # Helper functions
+├── requirements.txt                # Python dependencies
+├── .env                           # Environment variables
+├── static/
+│   ├── css/
+│   │   └── style.css              # Main CSS styles
+│   └── js/
+│       └── script.js              # JavaScript functionality
+└── templates/
+    ├── base.html                  # Base template
+    ├── index.html                 # Homepage
+    ├── register.html              # User registration
+    ├── login.html                 # User login
+    ├── profile_view.html          # User profile
+    ├── edit_profile.html          # Edit profile
+    ├── manage_allergens.html      # Allergen management
+    ├── search.html                # Product search
+    ├── search_results.html        # Search results
+    ├── product_detail.html        # Product details
+    ├── recommendations.html       # Product recommendations
+    ├── health_news.html           # Health articles
+    └── admin/
+        ├── dashboard.html         # Admin dashboard
+        ├── allergens.html         # Manage allergens
+        ├── products.html          # Manage products
+        ├── add_product.html       # Add product
+        ├── edit_product.html      # Edit product
+        ├── health_news.html       # Manage health news
+        ├── add_health_news.html   # Add health news
+        ├── edit_health_news.html  # Edit health news
+        └── users.html             # User management

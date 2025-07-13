@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Allergen Alert{% endblock %}
+
+{% block content %}
+<!-- Login Header -->
+<div class="modern-mb-6" style="text-align: center;">
+    <h1 style="font-size: var(--font-size-3xl); font-weight: 700; color: var(--accent-dark); margin-bottom: var(--space-2);">
+        Welcome Back
+    </h1>
+    <p style="color: #6B7280; font-size: var(--font-size-lg);">
+        Sign in to access your allergen profile
+    </p>
+</div>
+
+<!-- Login Form -->
+<div class="modern-card" style="max-width: 500px; margin: 0 auto;">
+    <div class="modern-card-body">
+        <form method="POST" action="{{ url_for('login') }}">
+            {{ form.hidden_tag() }}
+            
+            <div class="modern-form-group">
+                <label class="modern-form-label" for="{{ form.email.id }}">{{ form.email.label.text }}</label>
+                {{ form.email(class="modern-form-control", placeholder="Enter your email address") }}
+                {% if form.email.errors %}
+                    <div style="color: var(--error-red); font-size: var(--font-size-sm); margin-top: var(--space-1);">
+                        {% for error in form.email.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="modern-form-group">
+                <label class="modern-form-label" for="{{ form.password.id }}">{{ form.password.label.text }}</label>
+                <div class="password-input-container">
+                    {{ form.password(class="modern-form-control", type="password", placeholder="Enter your password") }}
+                    <span class="password-toggle-icon" data-target="{{ form.password.id }}" title="Show password">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
+                {% if form.password.errors %}
+                    <div style="color: var(--error-red); font-size: var(--font-size-sm); margin-top: var(--space-1);">
+                        {% for error in form.password.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-6);">
+                <label style="display: flex; align-items: center; cursor: pointer; color: var(--text-charcoal);">
+                    {{ form.remember_me(style="margin-right: var(--space-2);") }}
+                    <span style="font-size: var(--font-size-sm);">{{ form.remember_me.label.text }}</span>
+                </label>
+                <a href="#" style="color: var(--secondary-green); text-decoration: none; font-size: var(--font-size-sm); font-weight: 500;">
+                    Forgot Password?
+                </a>
+            </div>
+
+            <button type="submit" class="modern-btn modern-btn-primary modern-btn-lg" style="width: 100%;">
+                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Demo Accounts -->
+<div class="modern-card modern-mt-6" style="max-width: 500px; margin: 0 auto; background: rgba(16, 185, 129, 0.05); border-color: var(--secondary-green);">
+    <div class="modern-card-body" style="text-align: center;">
+        <h3 style="color: var(--secondary-green); margin-bottom: var(--space-3); font-size: var(--font-size-lg); font-weight: 600;">
+            <i class="fas fa-info-circle me-2"></i>Demo Accounts
+        </h3>
+        <div class="modern-grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+            <div>
+                <strong style="color: var(--accent-dark);">Regular User:</strong>
+                <p style="margin: var(--space-1) 0; color: #6B7280; font-size: var(--font-size-sm);">
+                    Email: user@example.com<br>
+                    Password: user123
+                </p>
+            </div>
+            <div>
+                <strong style="color: var(--accent-dark);">Admin User:</strong>
+                <p style="margin: var(--space-1) 0; color: #6B7280; font-size: var(--font-size-sm);">
+                    Email: admin@allergyinfo.ng<br>
+                    Password: admin123
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Don't have account -->
+<div style="text-align: center; margin-top: var(--space-6);">
+    <p style="color: #6B7280;">
+        Don't have an account? 
+        <a href="{{ url_for('register') }}" style="color: var(--secondary-green); text-decoration: none; font-weight: 500;">
+            Create one here
+        </a>
+    </p>
+</div>
+
+<script>
+// Password toggle functionality handled by app.js
+</script>
+
+{% endblock %}

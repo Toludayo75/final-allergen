@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Safe Products - Allergen Alert{% endblock %}
+
+{% block content %}
+<!-- Safe Products Header -->
+<div class="modern-mb-6" style="text-align: center;">
+    <h1 style="font-size: var(--font-size-3xl); font-weight: 700; color: var(--accent-dark); margin-bottom: var(--space-2);">
+        Products Safe for <span style="color: var(--secondary-green);">You</span>
+    </h1>
+    <p style="color: #6B7280; font-size: var(--font-size-lg); margin-bottom: var(--space-4);">
+        These products don't contain any of your allergens
+    </p>
+    
+    {% if current_user.get_allergens() %}
+        <div style="margin-top: var(--space-4);">
+            <p style="color: #6B7280; margin-bottom: var(--space-2);">Your allergens:</p>
+            {% for allergen in current_user.get_allergens() %}
+                <span class="modern-badge modern-badge-danger" style="margin-right: var(--space-1);">{{ allergen }}</span>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<!-- User Allergen Status -->
+{% if not current_user.get_allergens() %}
+    <div class="modern-alert modern-alert-info modern-mb-6" style="text-align: center;">
+        <h3 style="color: var(--accent-dark); margin-bottom: var(--space-2);">
+            <i class="fas fa-info-circle me-2"></i>No Allergens Selected
+        </h3>
+        <p style="color: #6B7280; margin-bottom: var(--space-4);">
+            You haven't selected any allergens yet. All products are considered safe for you.
+        </p>
+        <a href="{{ url_for('profile') }}" class="modern-btn modern-btn-primary">
+            <i class="fas fa-user-edit me-2"></i>Update My Allergens
+        </a>
+    </div>
+{% endif %}
+
+<!-- Products Section -->
+{% if products %}
+    <div class="modern-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-6);">
+        {% for product in products %}
+            <div class="modern-card" style="position: relative; height: fit-content;">
+                <!-- Safe Badge -->
+                <div style="position: absolute; top: var(--space-3); right: var(--space-3); z-index: 10;">
+                    <span class="modern-badge modern-badge-success">
+                        <i class="fas fa-shield-alt me-1"></i>Safe for You
+                    </span>
+                </div>
+                
+                <div class="modern-card-body">
+                    <h3 style="font-size: var(--font-size-lg); font-weight: 600; color: var(--accent-dark); margin-bottom: var(--space-2);">{{ product.name }}</h3>
+                    <p style="color: #6B7280; margin-bottom: var(--space-2);">
+                        <i class="fas fa-building me-1"></i>{{ product.manufacturer }}
+                    </p>
+                    <p style="margin-bottom: var(--space-2);">
+                        <span class="modern-badge modern-badge-light">{{ product.category }}</span>
+                    </p>
+                    <p style="color: #6B7280; font-size: var(--font-size-sm); margin-bottom: var(--space-3);">
+                        <i class="fas fa-certificate me-1"></i>NAFDAC: {{ product.nafdac_number }}
+                    </p>
+                    
+                    <!-- Ingredients Preview -->
+                    <div style="margin-bottom: var(--space-4);">
+                        <p style="color: #6B7280; font-size: var(--font-size-sm); margin-bottom: var(--space-1);">Main ingredients:</p>
+                        <div>
+                            {% for ingredient in product.get_ingredients_list()[:3] %}
+                                <span class="modern-badge modern-badge-light" style="margin-right: var(--space-1); margin-bottom: var(--space-1);">{{ ingredient }}</span>
+                            {% endfor %}
+                            {% if product.get_ingredients_list()|length > 3 %}
+                                <span style="color: #6B7280; font-size: var(--font-size-sm);">+{{ product.get_ingredients_list()|length - 3 }} more</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if product.description %}
+                        <p style="color: #6B7280; font-size: var(--font-size-sm); margin-bottom: var(--space-4);">
+                            {{ product.description[:80] }}{% if product.description|length > 80 %}...{% endif %}
+                        </p>
+                    {% endif %}
+                    
+                    <a href="{{ url_for('product_detail', product_id=product.id) }}" 
+                       class="modern-btn modern-btn-primary" style="width: 100%;">
+                        <i class="fas fa-info-circle me-2"></i>View Details
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Load More Section -->
+    <div style="text-align: center; margin-top: var(--space-8);">
+        <p style="color: #6B7280; margin-bottom: var(--space-4);">
+            Showing {{ products|length }} safe products
+        </p>
+        <div style="display: flex; justify-content: center; gap: var(--space-3); flex-wrap: wrap;">
+            <a href="{{ url_for('index') }}" class="modern-btn modern-btn-secondary">
+                <i class="fas fa-search me-2"></i>Search More Products
+            </a>
+            <a href="{{ url_for('profile') }}" class="modern-btn modern-btn-outline">
+                <i class="fas fa-user-edit me-2"></i>Update My Allergens
+            </a>
+        </div>
+    </div>
+{% else %}
+    <!-- No Safe Products -->
+    <div style="text-align: center; padding: var(--space-12) var(--space-6);">
+        {% if current_user.get_allergens() %}
+            <i class="fas fa-heart-broken" style="font-size: 4rem; color: #9CA3AF; margin-bottom: var(--space-4);"></i>
+            <h3 style="color: #6B7280; margin-bottom: var(--space-3);">No Safe Products Found</h3>
+            <p style="color: #6B7280; margin-bottom: var(--space-4);">
+                Unfortunately, we couldn't find any products that are completely safe for your allergens.
+                This might be because:
+            </p>
+            <ul style="list-style: none; color: #6B7280; margin-bottom: var(--space-6);">
+                <li style="margin-bottom: var(--space-1);"><i class="fas fa-circle me-2" style="font-size: 0.5rem;"></i>Your allergen combination is very restrictive</li>
+                <li style="margin-bottom: var(--space-1);"><i class="fas fa-circle me-2" style="font-size: 0.5rem;"></i>Our database is still growing</li>
+                <li style="margin-bottom: var(--space-1);"><i class="fas fa-circle me-2" style="font-size: 0.5rem;"></i>You may need to review your allergen list</li>
+            </ul>
+        {% else %}
+            <i class="fas fa-shield-alt" style="font-size: 4rem; color: #9CA3AF; margin-bottom: var(--space-4);"></i>
+            <h3 style="color: #6B7280; margin-bottom: var(--space-3);">All Products Are Safe</h3>
+            <p style="color: #6B7280; margin-bottom: var(--space-6);">
+                Since you haven't selected any allergens, all products in our database are considered safe for you.
+            </p>
+        {% endif %}
+        
+        <div style="display: flex; justify-content: center; gap: var(--space-3); flex-wrap: wrap;">
+            <a href="{{ url_for('profile') }}" class="modern-btn modern-btn-primary">
+                <i class="fas fa-user-edit me-2"></i>Review My Allergens
+            </a>
+            <a href="{{ url_for('index') }}" class="modern-btn modern-btn-secondary">
+                <i class="fas fa-home me-2"></i>Browse All Products
+            </a>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Safety Tips -->
+<div class="modern-card modern-mt-8">
+    <div class="modern-card-body">
+        <h3 style="color: var(--secondary-green); margin-bottom: var(--space-4);">
+            <i class="fas fa-lightbulb me-2"></i>Safety Tips
+        </h3>
+        <div class="modern-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-4);">
+            <div>
+                <ul style="list-style: none; padding: 0;">
+                    <li style="margin-bottom: var(--space-3);">
+                        <i class="fas fa-check" style="color: var(--secondary-green); margin-right: var(--space-2);"></i>
+                        Always double-check product labels before consuming
+                    </li>
+                    <li style="margin-bottom: var(--space-3);">
+                        <i class="fas fa-check" style="color: var(--secondary-green); margin-right: var(--space-2);"></i>
+                        Keep your allergen profile updated
+                    </li>
+                </ul>
+            </div>
+            <div>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Manufacturers may change ingredients without notice
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        When in doubt, consult a healthcare professional
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Actions -->
+            <div class="row mt-5">
+                <div class="col-md-6 mb-3">
+                    <div class="card border-0 h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-newspaper text-success mb-3" style="font-size: 2rem;"></i>
+                            <h6 class="text-success">Health News</h6>
+                            <p class="text-muted small">Stay updated with latest allergy and health information</p>
+                            <a href="{{ url_for('health_news') }}" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-arrow-right me-1"></i>Read Health News
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="card border-0 h-100">
+                        <div class="card-body text-center p-4">
+                            <i class="fas fa-search text-success mb-3" style="font-size: 2rem;"></i>
+                            <h6 class="text-success">Search Products</h6>
+                            <p class="text-muted small">Find specific products and check their allergen information</p>
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-arrow-right me-1"></i>Search Products
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.safe-product-card {
+    transition: transform 0.2s ease-in-out;
+    border-left: 4px solid var(--bs-success) !important;
+}
+
+.safe-product-card:hover {
+    transform: translateY(-5px);
+}
+
+.ingredients-preview .badge {
+    font-size: 0.75rem;
+}
+</style>
+{% endblock %}

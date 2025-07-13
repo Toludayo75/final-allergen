@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - Allergen Alert{% endblock %}
+
+{% block content %}
+<!-- Product Header -->
+<div class="modern-mb-6">
+    <nav style="margin-bottom: var(--space-4);">
+        {% if current_user.is_authenticated and current_user.is_admin %}
+            <a href="{{ url_for('admin_products') }}" style="color: var(--secondary-green); text-decoration: none; font-weight: 500;">
+                <i class="fas fa-arrow-left me-2"></i>Back to Admin Products
+            </a>
+        {% else %}
+            <a href="{{ url_for('search') }}" style="color: var(--secondary-green); text-decoration: none; font-weight: 500;">
+                <i class="fas fa-arrow-left me-2"></i>Back to Search
+            </a>
+        {% endif %}
+    </nav>
+    
+    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: var(--space-4);">
+        <div>
+            <h1 style="font-size: var(--font-size-3xl); font-weight: 700; color: var(--accent-dark); margin-bottom: var(--space-2);">
+                {{ product.name }}
+            </h1>
+            <p style="color: #6B7280; font-size: var(--font-size-lg);">
+                {{ product.manufacturer }} • {{ product.category }}
+            </p>
+        </div>
+        
+        {% if current_user.is_authenticated and not current_user.is_admin %}
+            {% if is_safe %}
+                <div class="modern-badge modern-badge-success" style="font-size: var(--font-size-base); padding: var(--space-3) var(--space-4);">
+                    <i class="fas fa-check-circle me-2"></i>Safe for You
+                </div>
+            {% else %}
+                <div class="modern-badge modern-badge-danger" style="font-size: var(--font-size-base); padding: var(--space-3) var(--space-4);">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Contains Your Allergens
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<!-- Product Information -->
+<div class="modern-grid" style="grid-template-columns: 2fr 1fr; gap: var(--space-6); margin-bottom: var(--space-8);">
+    <!-- Main Information -->
+    <div>
+        <!-- Basic Details -->
+        <div class="modern-card modern-mb-6">
+            <div class="modern-card-header">
+                <h2 class="modern-card-title">Product Details</h2>
+            </div>
+            <div class="modern-card-body">
+                <div class="modern-grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+                    <div>
+                        <strong style="color: var(--accent-dark);">NAFDAC Number:</strong>
+                        <p style="margin: var(--space-1) 0; color: #6B7280;">{{ product.nafdac_number }}</p>
+                    </div>
+                    <div>
+                        <strong style="color: var(--accent-dark);">Category:</strong>
+                        <p style="margin: var(--space-1) 0; color: #6B7280;">{{ product.category }}</p>
+                    </div>
+                    <div>
+                        <strong style="color: var(--accent-dark);">Manufacturer:</strong>
+                        <p style="margin: var(--space-1) 0; color: #6B7280;">{{ product.manufacturer }}</p>
+                    </div>
+                    <div>
+                        <strong style="color: var(--accent-dark);">Added:</strong>
+                        <p style="margin: var(--space-1) 0; color: #6B7280;">{{ product.created_at.strftime('%B %d, %Y') }}</p>
+                    </div>
+                </div>
+                
+                {% if product.description %}
+                    <div style="margin-top: var(--space-4);">
+                        <strong style="color: var(--accent-dark);">Description:</strong>
+                        <p style="margin: var(--space-2) 0; color: #6B7280; line-height: 1.6;">{{ product.description }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Ingredients -->
+        <div class="modern-card modern-mb-6">
+            <div class="modern-card-header">
+                <h2 class="modern-card-title">Ingredients</h2>
+                <p class="modern-card-subtitle">Complete list of ingredients in this product</p>
+            </div>
+            <div class="modern-card-body">
+                <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+                    {% for ingredient in product.get_ingredients_list() %}
+                        {% set is_user_allergen = current_user.is_authenticated and not current_user.is_admin and ingredient.strip() in conflicting_allergens %}
+                        <span class="modern-badge {{ 'modern-badge-danger' if is_user_allergen else '' }}" 
+                              style="font-size: var(--font-size-sm); padding: var(--space-2) var(--space-3); 
+                                     {{ 'background: rgba(220, 38, 38, 0.1); color: var(--error-red); border: 1px solid rgba(220, 38, 38, 0.2);' if is_user_allergen else 'background: var(--background-light); color: var(--text-charcoal); border: 1px solid var(--border-light);' }}">
+                            {% if is_user_allergen %}
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                            {% endif %}
+                            {{ ingredient.strip() }}
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Allergen Warning -->
+        {% if current_user.is_authenticated and not current_user.is_admin and not is_safe %}
+            <div class="modern-card" style="border-color: var(--error-red); background: rgba(220, 38, 38, 0.05);">
+                <div class="modern-card-body">
+                    <h3 style="color: var(--error-red); margin-bottom: var(--space-3); font-size: var(--font-size-lg); font-weight: 600;">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Allergen Warning
+                    </h3>
+                    <p style="color: var(--error-red); margin-bottom: var(--space-3);">
+                        This product contains ingredients that you've marked as allergens:
+                    </p>
+                    <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+                        {% for allergen in conflicting_allergens %}
+                            <span class="modern-badge modern-badge-danger">
+                                <i class="fas fa-times me-1"></i>{{ allergen }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+        <!-- Product Allergens -->
+        <div class="modern-card modern-mb-6">
+            <div class="modern-card-header">
+                <h3 class="modern-card-title">Detected Allergens</h3>
+                <p class="modern-card-subtitle">Common allergens found in this product</p>
+            </div>
+            <div class="modern-card-body">
+                {% if product_allergens %}
+                    <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                        {% for allergen in product_allergens %}
+                            <div style="display: flex; align-items: center; padding: var(--space-2); background: var(--background-light); border-radius: var(--radius-md);">
+                                {% if allergen == 'milk' %}
+                                    <i class="fas fa-glass-whiskey me-2" style="color: var(--warning-orange);"></i>
+                                {% elif allergen == 'wheat' %}
+                                    <i class="fas fa-bread-slice me-2" style="color: var(--warning-orange);"></i>
+                                {% elif allergen == 'eggs' %}
+                                    <i class="fas fa-egg me-2" style="color: var(--warning-orange);"></i>
+                                {% elif allergen == 'soy' %}
+                                    <i class="fas fa-leaf me-2" style="color: var(--warning-orange);"></i>
+                                {% elif allergen == 'peanuts' %}
+                                    <i class="fas fa-seedling me-2" style="color: var(--warning-orange);"></i>
+                                {% elif allergen == 'tree nuts' %}
+                                    <i class="fas fa-tree me-2" style="color: var(--warning-orange);"></i>
+                                {% elif allergen == 'fish' %}
+                                    <i class="fas fa-fish me-2" style="color: var(--warning-orange);"></i>
+                                {% elif allergen == 'shellfish' %}
+                                    <i class="fas fa-shrimp me-2" style="color: var(--warning-orange);"></i>
+                                {% elif allergen == 'sesame' %}
+                                    <i class="fas fa-circle me-2" style="color: var(--warning-orange);"></i>
+                                {% else %}
+                                    <i class="fas fa-exclamation-triangle me-2" style="color: var(--warning-orange);"></i>
+                                {% endif %}
+                                <span style="color: var(--accent-dark); font-weight: 500; text-transform: capitalize;">{{ allergen }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: var(--space-4); color: #6B7280);">
+                        <i class="fas fa-shield-alt" style="font-size: var(--font-size-xl); margin-bottom: var(--space-2); color: var(--secondary-green);"></i>
+                        <p>No common allergens detected</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Alternative Products -->
+        {% if current_user.is_authenticated and not current_user.is_admin and not is_safe %}
+            <div class="modern-card">
+                <div class="modern-card-header">
+                    <h3 class="modern-card-title">Safe Alternatives</h3>
+                    <p class="modern-card-subtitle">Similar products that are safe for you</p>
+                </div>
+                <div class="modern-card-body">
+                    {% if alternatives %}
+                        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+                            {% for alt in alternatives[:3] %}
+                                <div style="padding: var(--space-3); background: var(--background-light); border-radius: var(--radius-md);">
+                                    <h4 style="font-size: var(--font-size-base); font-weight: 600; color: var(--accent-dark); margin-bottom: var(--space-1);">
+                                        {{ alt.name }}
+                                    </h4>
+                                    <p style="font-size: var(--font-size-sm); color: #6B7280; margin-bottom: var(--space-2);">
+                                        {{ alt.manufacturer }}
+                                    </p>
+                                    <a href="{{ url_for('product_detail', product_id=alt.id) }}" class="modern-btn modern-btn-secondary modern-btn-sm" style="width: 100%;">
+                                        View Details
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; padding: var(--space-4); color: #6B7280;">
+                            <i class="fas fa-exclamation-circle" style="font-size: var(--font-size-xl); margin-bottom: var(--space-2); color: var(--warning-orange);"></i>
+                            <h5 style="color: var(--accent-dark); margin-bottom: var(--space-2);">No Safe Alternatives Found</h5>
+                            <p style="margin-bottom: var(--space-3); line-height: 1.5;">
+                                Unfortunately, no products in the <strong>{{ product.category }}</strong> category are safe for your allergen profile.
+                            </p>
+                            <p style="font-size: var(--font-size-sm); margin-bottom: var(--space-3);">
+                                <strong>Tip:</strong> Try searching in different product categories that might not contain your allergens.
+                            </p>
+                            <a href="{{ url_for('search') }}" class="modern-btn modern-btn-primary modern-btn-sm">
+                                <i class="fas fa-search me-2"></i>Browse Other Categories
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Similar Products -->
+{% if current_user.is_authenticated and not current_user.is_admin %}
+    <div class="modern-card">
+        <div class="modern-card-header">
+            <h2 class="modern-card-title">More in {{ product.category }}</h2>
+            <p class="modern-card-subtitle">Other products in the same category</p>
+        </div>
+        <div class="modern-card-body">
+            <div style="text-align: center; padding: var(--space-4); color: #6B7280);">
+                <a href="{{ url_for('search_results') }}?q={{ product.category }}" class="modern-btn modern-btn-primary">
+                    <i class="fas fa-search me-2"></i>Browse {{ product.category }} Products
+                </a>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}

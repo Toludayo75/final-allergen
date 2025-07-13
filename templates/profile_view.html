@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - Allergen Alert{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Your Profile</h1>
+    <p>Manage your personal information and allergen preferences</p>
+</div>
+
+<div class="row">
+    <!-- Personal Information Card -->
+    <div class="col-lg-8 mb-4">
+        <div class="modern-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0">Personal Information</h5>
+                    <a href="{{ url_for('edit_profile') }}" class="modern-btn modern-btn-primary">
+                        <i class="fas fa-edit me-2"></i>Edit Profile
+                    </a>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">First Name</label>
+                        <p class="mb-0 fw-semibold">{{ current_user.first_name }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Last Name</label>
+                        <p class="mb-0 fw-semibold">{{ current_user.last_name }}</p>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <label class="form-label text-muted">Email Address</label>
+                        <p class="mb-0 fw-semibold">{{ current_user.email }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted">Member Since</label>
+                        <p class="mb-0 fw-semibold">{{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Allergen Information Card -->
+    <div class="col-lg-4 mb-4">
+        <div class="modern-card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Your Allergens</h5>
+                
+                {% set user_allergens = current_user.get_allergens() %}
+                {% if user_allergens %}
+                    <div class="allergen-list mb-3">
+                        {% for allergen in user_allergens %}
+                            <div class="allergen-item safe mb-2">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <span>{{ allergen }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center mb-3">
+                        <i class="fas fa-info-circle text-muted mb-2" style="font-size: 2rem;"></i>
+                        <p class="text-muted mb-0">No allergens selected</p>
+                    </div>
+                {% endif %}
+                
+                <div class="text-center">
+                    <a href="{{ url_for('manage_allergens') }}" class="modern-btn modern-btn-secondary w-100">
+                        <i class="fas fa-plus me-2"></i>Add/Manage Allergens
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Safety Statistics -->
+<div class="row">
+    <div class="col-12">
+        <div class="modern-card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Safety Statistics</h5>
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="stat-item">
+                            <i class="fas fa-shield-check text-success mb-2" style="font-size: 2rem;"></i>
+                            <h4 class="mb-1">{{ safe_products_count or 0 }}</h4>
+                            <p class="text-muted mb-0">Safe Products Found</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-item">
+                            <i class="fas fa-exclamation-triangle text-warning mb-2" style="font-size: 2rem;"></i>
+                            <h4 class="mb-1">{{ user_allergens|length }}</h4>
+                            <p class="text-muted mb-0">Allergens Tracked</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-item">
+                            <i class="fas fa-search text-info mb-2" style="font-size: 2rem;"></i>
+                            <h4 class="mb-1">{{ total_products_count or 0 }}</h4>
+                            <p class="text-muted mb-0">Products in Database</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

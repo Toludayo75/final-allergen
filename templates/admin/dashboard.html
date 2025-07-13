@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Allergen Alert{% endblock %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="modern-mb-6">
+    <h1 style="font-size: var(--font-size-3xl); font-weight: 700; color: var(--accent-dark); margin-bottom: var(--space-2);">
+        Admin Dashboard
+    </h1>
+    <p style="color: #6B7280; font-size: var(--font-size-lg);">
+        Manage allergens, products, and content for Allergen Alert
+    </p>
+</div>
+
+<!-- Stats Overview -->
+<div class="modern-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-6); margin-bottom: var(--space-8);">
+    <div class="modern-card">
+        <div class="modern-card-body" style="text-align: center;">
+            <div style="width: 60px; height: 60px; background: var(--secondary-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-3);">
+                <i class="fas fa-users" style="font-size: var(--font-size-xl); color: var(--primary-white);"></i>
+            </div>
+            <h3 style="font-size: var(--font-size-2xl); font-weight: 700; color: var(--accent-dark); margin-bottom: var(--space-1);">
+                {{ user_count }}
+            </h3>
+            <p style="color: #6B7280;">Total Users</p>
+        </div>
+    </div>
+
+    <div class="modern-card">
+        <div class="modern-card-body" style="text-align: center;">
+            <div style="width: 60px; height: 60px; background: var(--warning-orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-3);">
+                <i class="fas fa-exclamation-triangle" style="font-size: var(--font-size-xl); color: var(--primary-white);"></i>
+            </div>
+            <h3 style="font-size: var(--font-size-2xl); font-weight: 700; color: var(--accent-dark); margin-bottom: var(--space-1);">
+                {{ allergen_count }}
+            </h3>
+            <p style="color: #6B7280;">Allergens</p>
+        </div>
+    </div>
+
+    <div class="modern-card">
+        <div class="modern-card-body" style="text-align: center;">
+            <div style="width: 60px; height: 60px; background: var(--accent-dark); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-3);">
+                <i class="fas fa-box" style="font-size: var(--font-size-xl); color: var(--primary-white);"></i>
+            </div>
+            <h3 style="font-size: var(--font-size-2xl); font-weight: 700; color: var(--accent-dark); margin-bottom: var(--space-1);">
+                {{ product_count }}
+            </h3>
+            <p style="color: #6B7280;">Products</p>
+        </div>
+    </div>
+
+    <div class="modern-card">
+        <div class="modern-card-body" style="text-align: center;">
+            <div style="width: 60px; height: 60px; background: var(--error-red); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-3);">
+                <i class="fas fa-newspaper" style="font-size: var(--font-size-xl); color: var(--primary-white);"></i>
+            </div>
+            <h3 style="font-size: var(--font-size-2xl); font-weight: 700; color: var(--accent-dark); margin-bottom: var(--space-1);">
+                {{ news_count }}
+            </h3>
+            <p style="color: #6B7280;">Health Articles</p>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="modern-grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+    <!-- Management Actions -->
+    <div class="modern-card">
+        <div class="modern-card-header">
+            <h2 class="modern-card-title">Quick Actions</h2>
+            <p class="modern-card-subtitle">Common administrative tasks</p>
+        </div>
+        <div class="modern-card-body">
+            <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+                <a href="{{ url_for('admin_add_product') }}" class="modern-btn modern-btn-primary" style="justify-content: flex-start;">
+                    <i class="fas fa-plus me-3"></i>Add New Product
+                </a>
+                <a href="{{ url_for('admin_add_health_news') }}" class="modern-btn modern-btn-secondary" style="justify-content: flex-start;">
+                    <i class="fas fa-plus me-3"></i>Add Health Article
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="modern-card">
+        <div class="modern-card-header">
+            <h2 class="modern-card-title">Management Sections</h2>
+            <p class="modern-card-subtitle">Navigate to different admin areas</p>
+        </div>
+        <div class="modern-card-body">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3);">
+                <a href="{{ url_for('admin_products') }}" class="modern-btn modern-btn-secondary modern-btn-sm" style="justify-content: center;">
+                    <i class="fas fa-box me-2"></i>Products
+                </a>
+                <a href="{{ url_for('admin_allergens') }}" class="modern-btn modern-btn-secondary modern-btn-sm" style="justify-content: center;">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Allergens
+                </a>
+                <a href="{{ url_for('admin_health_news') }}" class="modern-btn modern-btn-secondary modern-btn-sm" style="justify-content: center;">
+                    <i class="fas fa-newspaper me-2"></i>Health News
+                </a>
+                <a href="{{ url_for('admin_users') }}" class="modern-btn modern-btn-secondary modern-btn-sm" style="justify-content: center;">
+                    <i class="fas fa-users me-2"></i>Users
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="modern-card modern-mt-8">
+    <div class="modern-card-header">
+        <h2 class="modern-card-title">Recent Activity</h2>
+        <p class="modern-card-subtitle">Latest additions and updates</p>
+    </div>
+    <div class="modern-card-body">
+        <div class="modern-grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-6);">
+            <!-- Recent Products -->
+            <div>
+                <h3 style="color: var(--accent-dark); margin-bottom: var(--space-3); font-size: var(--font-size-lg); font-weight: 600;">
+                    Latest Products
+                </h3>
+                {% if recent_products %}
+                    <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                        {% for product in recent_products[:3] %}
+                            <div style="padding: var(--space-3); background: var(--background-light); border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong style="color: var(--accent-dark);">{{ product.name }}</strong>
+                                    <p style="color: #6B7280; font-size: var(--font-size-sm); margin: 0;">{{ product.manufacturer }}</p>
+                                </div>
+                                <a href="{{ url_for('admin_edit_product', product_id=product.id) }}" class="modern-btn modern-btn-secondary modern-btn-sm">
+                                    Edit
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color: #6B7280; text-align: center; padding: var(--space-4);">No products added yet</p>
+                {% endif %}
+            </div>
+
+            <!-- Recent Health News -->
+            <div>
+                <h3 style="color: var(--accent-dark); margin-bottom: var(--space-3); font-size: var(--font-size-lg); font-weight: 600;">
+                    Latest Health Articles
+                </h3>
+                {% if recent_news %}
+                    <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+                        {% for article in recent_news[:3] %}
+                            <div style="padding: var(--space-3); background: var(--background-light); border-radius: var(--radius-md); display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong style="color: var(--accent-dark);">{{ article.title[:40] }}{% if article.title|length > 40 %}...{% endif %}</strong>
+                                    <p style="color: #6B7280; font-size: var(--font-size-sm); margin: 0;">{{ article.author }}</p>
+                                </div>
+                                <a href="{{ url_for('admin_edit_health_news', news_id=article.id) }}" class="modern-btn modern-btn-secondary modern-btn-sm">
+                                    Edit
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color: #6B7280; text-align: center; padding: var(--space-4);">No articles added yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

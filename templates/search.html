@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Search Products - Allergen Alert{% endblock %}
+
+{% block content %}
+<!-- Search Header -->
+<div class="modern-mb-6">
+    <h1 style="font-size: var(--font-size-3xl); font-weight: 700; color: var(--accent-dark); margin-bottom: var(--space-2);">
+        Search Products
+    </h1>
+    <p style="color: #6B7280; font-size: var(--font-size-lg);">
+        Find Nigerian products and check for allergens
+    </p>
+</div>
+
+<!-- Search Form -->
+<div class="modern-card modern-mb-6">
+    <div class="modern-card-body">
+        <form action="{{ url_for('search_results') }}" method="GET" style="margin: 0;">
+            <div class="input-group input-group-lg">
+                <input type="text" 
+                       name="q" 
+                       class="form-control" 
+                       placeholder="Search by product name, NAFDAC number, manufacturer, or ingredients..."
+                       value="{{ request.args.get('q', '') }}"
+                       autofocus>
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-search me-2"></i>Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Search Tips -->
+<div class="modern-card modern-mb-6" style="background: rgba(16, 185, 129, 0.05); border-color: var(--secondary-green);">
+    <div class="modern-card-body">
+        <h3 style="color: var(--secondary-green); margin-bottom: var(--space-3); font-size: var(--font-size-lg); font-weight: 600;">
+            <i class="fas fa-lightbulb me-2"></i>Search Tips
+        </h3>
+        <div class="modern-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-4);">
+            <div>
+                <strong style="color: var(--accent-dark);">By Product Name:</strong>
+                <p style="margin: var(--space-1) 0; color: #6B7280;">Try "Indomie", "Peak Milk", "Golden Morn"</p>
+            </div>
+            <div>
+                <strong style="color: var(--accent-dark);">By NAFDAC Number:</strong>
+                <p style="margin: var(--space-1) 0; color: #6B7280;">Use format like "A7-1234" or just "1234"</p>
+            </div>
+            <div>
+                <strong style="color: var(--accent-dark);">By Manufacturer:</strong>
+                <p style="margin: var(--space-1) 0; color: #6B7280;">Search "Nestle", "Unilever", "Cadbury"</p>
+            </div>
+            <div>
+                <strong style="color: var(--accent-dark);">By Ingredients:</strong>
+                <p style="margin: var(--space-1) 0; color: #6B7280;">Find products containing "wheat", "milk", "soy"</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Results -->
+{% if request.args.get('q') %}
+    {% if products %}
+        <div class="modern-mb-4">
+            <h2 style="font-size: var(--font-size-2xl); font-weight: 600; color: var(--accent-dark);">
+                Search Results for "{{ request.args.get('q') }}"
+            </h2>
+            <p style="color: #6B7280;">Found {{ products|length }} product(s)</p>
+        </div>
+
+        <div class="modern-grid" style="grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: var(--space-6);">
+            {% for product in products %}
+                <div class="modern-card">
+                    <div class="modern-card-body">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-4);">
+                            <h3 style="font-size: var(--font-size-xl); font-weight: 600; color: var(--accent-dark); margin: 0;">
+                                {{ product.name }}
+                            </h3>
+                            {% if current_user.is_authenticated and not current_user.is_admin %}
+                                {% if product.has_allergen_for_user(current_user) %}
+                                    <span class="modern-badge modern-badge-danger">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>Warning
+                                    </span>
+                                {% else %}
+                                    <span class="modern-badge modern-badge-success">
+                                        <i class="fas fa-check-circle me-1"></i>Safe
+                                    </span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+
+                        <div style="margin-bottom: var(--space-4);">
+                            <div style="margin-bottom: var(--space-2);">
+                                <strong style="color: var(--accent-dark);">NAFDAC:</strong>
+                                <span style="color: #6B7280;">{{ product.nafdac_number }}</span>
+                            </div>
+                            <div style="margin-bottom: var(--space-2);">
+                                <strong style="color: var(--accent-dark);">Manufacturer:</strong>
+                                <span style="color: #6B7280;">{{ product.manufacturer }}</span>
+                            </div>
+                            <div style="margin-bottom: var(--space-2);">
+                                <strong style="color: var(--accent-dark);">Category:</strong>
+                                <span style="color: #6B7280;">{{ product.category }}</span>
+                            </div>
+                        </div>
+
+                        {% if product.description %}
+                            <p style="color: #6B7280; margin-bottom: var(--space-4); line-height: 1.5;">
+                                {{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}
+                            </p>
+                        {% endif %}
+
+                        {% if current_user.is_authenticated and not current_user.is_admin and product.has_allergen_for_user(current_user) %}
+                            <div style="background: rgba(220, 38, 38, 0.1); padding: var(--space-3); border-radius: var(--radius-md); margin-bottom: var(--space-4); border-left: 4px solid var(--error-red);">
+                                <strong style="color: var(--error-red);">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Allergen Warning
+                                </strong>
+                                <p style="margin: var(--space-1) 0 0 0; color: var(--error-red); font-size: var(--font-size-sm);">
+                                    This product contains allergens you're sensitive to.
+                                </p>
+                            </div>
+                        {% endif %}
+
+                        <a href="{{ url_for('product_detail', product_id=product.id) }}" class="modern-btn modern-btn-primary" style="width: 100%;">
+                            <i class="fas fa-eye me-2"></i>View Details
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="modern-card" style="text-align: center; padding: var(--space-8);">
+            <div style="font-size: 4rem; color: #E5E7EB; margin-bottom: var(--space-4);">
+                <i class="fas fa-search"></i>
+            </div>
+            <h3 style="color: var(--accent-dark); margin-bottom: var(--space-2);">No products found</h3>
+            <p style="color: #6B7280; margin-bottom: var(--space-4);">
+                We couldn't find any products matching "{{ request.args.get('q') }}". Try different keywords or check your spelling.
+            </p>
+            <button onclick="document.querySelector('input[name=q]').focus()" class="modern-btn modern-btn-secondary">
+                <i class="fas fa-redo me-2"></i>Try Another Search
+            </button>
+        </div>
+    {% endif %}
+{% else %}
+    <!-- Popular Categories -->
+    <div class="modern-card">
+        <div class="modern-card-header">
+            <h3 class="modern-card-title">Popular Categories</h3>
+            <p class="modern-card-subtitle">Browse products by category</p>
+        </div>
+        <div class="modern-card-body">
+            <div class="modern-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4);">
+                <a href="{{ url_for('search_results') }}?q=beverages" class="modern-btn modern-btn-secondary modern-btn-lg">
+                    <i class="fas fa-coffee me-2"></i>Beverages
+                </a>
+                <a href="{{ url_for('search_results') }}?q=snacks" class="modern-btn modern-btn-secondary modern-btn-lg">
+                    <i class="fas fa-cookie-bite me-2"></i>Snacks
+                </a>
+                <a href="{{ url_for('search_results') }}?q=dairy" class="modern-btn modern-btn-secondary modern-btn-lg">
+                    <i class="fas fa-cheese me-2"></i>Dairy
+                </a>
+                <a href="{{ url_for('search_results') }}?q=cereals" class="modern-btn modern-btn-secondary modern-btn-lg">
+                    <i class="fas fa-seedling me-2"></i>Cereals
+                </a>
+                <a href="{{ url_for('search_results') }}?q=noodles" class="modern-btn modern-btn-secondary modern-btn-lg">
+                    <i class="fas fa-utensils me-2"></i>Noodles
+                </a>
+                <a href="{{ url_for('search_results') }}?q=condiments" class="modern-btn modern-btn-secondary modern-btn-lg">
+                    <i class="fas fa-pepper-hot me-2"></i>Condiments
+                </a>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}

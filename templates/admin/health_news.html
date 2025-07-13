@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Health News - Admin - Allergen Alert{% endblock %}
+
+{% block content %}
+<div class="container-fluid my-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-6 fw-bold text-dark">Manage Health News</h1>
+                    <p class="text-muted">Create, edit, and publish health and allergy information</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary me-2">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                    </a>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addNewsModal">
+                        <i class="fas fa-plus me-1"></i>Add Article
+                    </button>
+                </div>
+            </div>
+
+            <!-- Health News List -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-newspaper me-2"></i>All Health News Articles ({{ news|length }})
+                    </h4>
+                </div>
+                <div class="card-body p-0">
+                    {% if news %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="30%">Title</th>
+                                        <th width="20%">Author</th>
+                                        <th width="15%">Published</th>
+                                        <th width="15%">Status</th>
+                                        <th width="10%">Views</th>
+                                        <th width="10%">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for article in news %}
+                                        <tr>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ article.title }}</strong>
+                                                    <br><small class="text-muted">{{ article.content[:80] }}{% if article.content|length > 80 %}...{% endif %}</small>
+                                                </div>
+                                            </td>
+                                            <td class="text-muted">
+                                                <i class="fas fa-user-md me-1"></i>{{ article.author }}
+                                            </td>
+                                            <td class="text-muted">
+                                                {{ article.published_at.strftime('%m/%d/%Y') }}
+                                            </td>
+                                            <td>
+                                                {% if article.is_published %}
+                                                    <span class="badge bg-success">Published</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning text-dark">Draft</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-muted">
+                                                <i class="fas fa-eye me-1"></i>0
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button class="btn btn-sm btn-outline-info" 
+                                                            onclick="viewArticle({{ loop.index0 }})" title="Preview">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-primary" 
+                                                            onclick="editArticle({{ article.id }})" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" 
+                                                            onclick="deleteArticle({{ article.id }}, '{{ article.title }}')" title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-newspaper text-muted" style="font-size: 4rem;"></i>
+                            <h4 class="mt-3 text-muted">No Health News Articles</h4>
+                            <p class="text-muted">Create your first health news article to get started.</p>
+                            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addNewsModal">
+                                <i class="fas fa-plus me-1"></i>Create First Article
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Health News Modal -->
+<div class="modal fade" id="addNewsModal" tabindex="-1" aria-labelledby="addNewsModalLabel" aria-hidden="true" style="z-index: 9999;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" action="{{ url_for('admin_add_health_news') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="addNewsModalLabel">
+                        <i class="fas fa-plus me-2"></i>Create New Health Article
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="news_title" class="form-label">Article Title *</label>
+                        <input type="text" class="form-control" id="news_title" name="title" required>
+                        <div class="form-text">Make it engaging and informative</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="news_author" class="form-label">Author *</label>
+                        <input type="text" class="form-control" id="news_author" name="author" required>
+                        <div class="form-text">Name of the author or medical professional</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="news_content" class="form-label">Article Content *</label>
+                        <textarea class="form-control" id="news_content" name="content" rows="10" required></textarea>
+                        <div class="form-text">Write the full article content. Use paragraphs for better readability.</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="news_published" name="is_published" checked>
+                            <label class="form-check-label" for="news_published">
+                                Publish immediately
+                            </label>
+                        </div>
+                        <div class="form-text">Uncheck to save as draft</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-plus me-1"></i>Create Article
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Health News Modal -->
+<div class="modal fade" id="editNewsModal" tabindex="-1" aria-labelledby="editNewsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="POST" id="editNewsForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="editNewsModalLabel">
+                        <i class="fas fa-edit me-2"></i>Edit Health Article
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_news_title" class="form-label">Article Title *</label>
+                        <input type="text" class="form-control" id="edit_news_title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_news_author" class="form-label">Author *</label>
+                        <input type="text" class="form-control" id="edit_news_author" name="author" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_news_content" class="form-label">Article Content *</label>
+                        <textarea class="form-control" id="edit_news_content" name="content" rows="10" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="edit_news_published" name="is_published">
+                            <label class="form-check-label" for="edit_news_published">
+                                Published
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Article Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="previewModalLabel">
+                    <i class="fas fa-eye me-2"></i>Article Preview
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <article>
+                    <header class="mb-4">
+                        <h2 id="previewTitle" class="text-dark"></h2>
+                        <div class="d-flex justify-content-between align-items-center text-muted">
+                            <div>
+                                <i class="fas fa-user-md me-1"></i>
+                                <span id="previewAuthor"></span>
+                            </div>
+                            <div>
+                                <i class="fas fa-calendar me-1"></i>
+                                <span id="previewDate"></span>
+                            </div>
+                        </div>
+                        <hr>
+                    </header>
+                    <div id="previewContent"></div>
+                </article>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteNewsModal" tabindex="-1" aria-labelledby="deleteNewsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteNewsModalLabel">
+                    <i class="fas fa-trash me-2"></i>Delete Health Article
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone.
+                </div>
+                <p>Are you sure you want to delete the article "<span id="deleteNewsTitle" class="fw-bold"></span>"?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" id="deleteNewsForm" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Delete Article
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const articles = [
+    {% for article in news %}
+    {
+        id: {{ article.id }},
+        title: {{ article.title|tojson }},
+        content: {{ article.content|tojson }},
+        author: {{ article.author|tojson }},
+        published_at: {{ article.published_at.strftime('%Y-%m-%d')|tojson if article.published_at else 'null' }},
+        is_published: {{ article.is_published|tojson }}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+];
+
+function viewArticle(index) {
+    if (articles && articles[index]) {
+        const article = articles[index];
+        document.getElementById('previewTitle').textContent = article.title;
+        document.getElementById('previewAuthor').textContent = article.author;
+        document.getElementById('previewDate').textContent = new Date(article.published_at).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        document.getElementById('previewContent').innerHTML = '<p>' + article.content.replace(/\n/g, '</p><p>') + '</p>';
+        
+        const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+        modal.show();
+    }
+}
+
+function editArticle(id) {
+    // Find the article by ID
+    const article = articles.find(a => a.id === id);
+    if (article) {
+        document.getElementById('edit_news_title').value = article.title;
+        document.getElementById('edit_news_author').value = article.author;
+        document.getElementById('edit_news_content').value = article.content;
+        document.getElementById('edit_news_published').checked = article.is_published;
+        document.getElementById('editNewsForm').action = `/admin/health-news/edit/${id}`;
+        
+        const modal = new bootstrap.Modal(document.getElementById('editNewsModal'));
+        modal.show();
+    }
+}
+
+function deleteArticle(id, title) {
+    document.getElementById('deleteNewsTitle').textContent = title;
+    document.getElementById('deleteNewsForm').action = `/admin/health-news/delete/${id}`;
+    
+    const modal = new bootstrap.Modal(document.getElementById('deleteNewsModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

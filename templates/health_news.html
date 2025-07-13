@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Health News - Allergen Alert{% endblock %}
+
+{% block content %}
+<!-- Health News Header -->
+<div class="modern-mb-6">
+    <h1 style="font-size: var(--font-size-3xl); font-weight: 700; color: var(--accent-dark); margin-bottom: var(--space-2);">
+        Health News & Tips
+    </h1>
+    <p style="color: #6B7280; font-size: var(--font-size-lg);">
+        Stay informed with the latest allergy and health news in Nigeria
+    </p>
+</div>
+
+<!-- Health News Articles -->
+{% if news %}
+    <div class="modern-grid" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: var(--space-6);">
+        {% for article in news %}
+            <div class="modern-card">
+                <div class="modern-card-body">
+                    <div style="margin-bottom: var(--space-4);">
+                        <h3 style="font-size: var(--font-size-xl); font-weight: 600; color: var(--accent-dark); margin-bottom: var(--space-2); line-height: 1.4;">
+                            {{ article.title }}
+                        </h3>
+                        <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); color: #6B7280; font-size: var(--font-size-sm);">
+                            <span>
+                                <i class="fas fa-user me-1"></i>{{ article.author }}
+                            </span>
+                            <span>
+                                <i class="fas fa-calendar me-1"></i>{{ article.published_at.strftime('%B %d, %Y') }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div style="color: #6B7280; line-height: 1.6; margin-bottom: var(--space-4);">
+                        {{ article.content[:200] }}{% if article.content|length > 200 %}...{% endif %}
+                    </div>
+
+                    <button onclick="readMore({{ loop.index0 }})" class="modern-btn modern-btn-secondary" style="width: 100%;">
+                        <i class="fas fa-book-open me-2"></i>Read Full Article
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Full Article Modal -->
+    <div id="articleModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 1000; padding: var(--space-4);" onclick="closeModal(event)">
+        <div class="modern-card" style="max-width: 800px; margin: 2rem auto; max-height: 90vh; overflow-y: auto;" onclick="event.stopPropagation()">
+            <div class="modern-card-header" style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <h2 id="modalTitle" class="modern-card-title" style="margin-bottom: var(--space-2);"></h2>
+                    <div id="modalMeta" style="color: #6B7280; font-size: var(--font-size-sm);"></div>
+                </div>
+                <button onclick="closeModal()" class="modern-btn modern-btn-secondary modern-btn-sm">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modern-card-body">
+                <div id="modalContent" style="color: var(--text-charcoal); line-height: 1.7; font-size: var(--font-size-base);"></div>
+            </div>
+        </div>
+    </div>
+
+{% else %}
+    <!-- No Articles -->
+    <div class="modern-card" style="text-align: center; padding: var(--space-8);">
+        <div style="font-size: 4rem; color: #E5E7EB; margin-bottom: var(--space-4);">
+            <i class="fas fa-newspaper"></i>
+        </div>
+        <h3 style="color: var(--accent-dark); margin-bottom: var(--space-2);">No Health News Available</h3>
+        <p style="color: #6B7280; margin-bottom: var(--space-4);">
+            We're working on bringing you the latest health and allergy news. Check back soon!
+        </p>
+        <a href="{{ url_for('index') }}" class="modern-btn modern-btn-primary">
+            <i class="fas fa-home me-2"></i>Back to Home
+        </a>
+    </div>
+{% endif %}
+
+<script>
+const articles = [];
+{% if news %}
+{% for article in news %}
+articles.push({
+    title: {{ article.title|tojson }},
+    content: {{ article.content|tojson }},
+    author: {{ article.author|tojson }},
+    published_at: {{ article.published_at.strftime('%B %d, %Y')|tojson }}
+});
+{% endfor %}
+{% endif %}
+
+function readMore(index) {
+    if (!articles || !articles[index]) return;
+    
+    const article = articles[index];
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMeta = document.getElementById('modalMeta');
+    const modalContent = document.getElementById('modalContent');
+    
+    if (!modalTitle || !modalMeta || !modalContent) {
+        console.error('Modal elements not found');
+        return;
+    }
+    
+    modalTitle.textContent = article.title;
+    modalMeta.innerHTML = `
+        <i class="fas fa-user me-1"></i>${article.author} • 
+        <i class="fas fa-calendar me-1"></i>${new Date(article.published_at).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long', 
+            day: 'numeric'
+        })}
+    `;
+    modalContent.innerHTML = article.content.replace(/\n/g, '<br>');
+    document.getElementById('articleModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal(event) {
+    if (!event || event.target.id === 'articleModal' || event.type === 'click') {
+        document.getElementById('articleModal').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+}
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeModal();
+    }
+});
+</script>
+
+{% endblock %}

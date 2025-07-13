@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Allergen Alert{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div style="text-align: center; padding: var(--space-12) 0; background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(16, 185, 129, 0.1)); border-radius: var(--radius-xl); margin-bottom: var(--space-8);">
+    <div style="max-width: 800px; margin: 0 auto;">
+        <h1 style="font-size: var(--font-size-4xl); font-weight: 700; color: var(--accent-dark); margin-bottom: var(--space-4);">
+            Safe Food Choices for 
+            <span style="color: var(--secondary-green);">Every Nigerian</span>
+        </h1>
+        <p style="font-size: var(--font-size-xl); color: #6B7280; margin-bottom: var(--space-6); line-height: 1.6;">
+            Discover Nigerian products that are safe for your allergies. Search our comprehensive database 
+            of local products with detailed allergen information.
+        </p>
+        
+        {% if current_user.is_authenticated %}
+            {% if not current_user.is_admin %}
+                <div style="display: flex; justify-content: center; gap: var(--space-4); flex-wrap: wrap;">
+                    <a href="{{ url_for('search') }}" class="modern-btn modern-btn-primary modern-btn-lg">
+                        <i class="fas fa-search me-2"></i>Search Products
+                    </a>
+                    <a href="{{ url_for('recommendations') }}" class="modern-btn modern-btn-secondary modern-btn-lg">
+                        <i class="fas fa-star me-2"></i>My Recommendations
+                    </a>
+                </div>
+            {% endif %}
+        {% else %}
+            <div style="display: flex; justify-content: center; gap: var(--space-4); flex-wrap: wrap;">
+                <a href="{{ url_for('register') }}" class="modern-btn modern-btn-primary modern-btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>Get Started
+                </a>
+                <a href="{{ url_for('health_news') }}" class="modern-btn modern-btn-secondary modern-btn-lg">
+                    <i class="fas fa-newspaper me-2"></i>Health News
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="modern-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-6); margin-bottom: var(--space-8);">
+    <!-- Feature 1 -->
+    <div class="modern-card">
+        <div class="modern-card-body" style="text-align: center;">
+            <div style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.1); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4) auto; color: var(--secondary-green); font-size: var(--font-size-3xl);">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h3 style="font-size: var(--font-size-xl); font-weight: 600; color: var(--accent-dark); margin-bottom: var(--space-3);">
+                Allergen Protection
+            </h3>
+            <p style="color: #6B7280; line-height: 1.6;">
+                Get instant warnings about products that contain your specific allergens. Stay safe with personalized alerts.
+            </p>
+        </div>
+    </div>
+
+    <!-- Feature 2 -->
+    <div class="modern-card">
+        <div class="modern-card-body" style="text-align: center;">
+            <div style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.1); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4) auto; color: var(--secondary-green); font-size: var(--font-size-3xl);">
+                <i class="fas fa-database"></i>
+            </div>
+            <h3 style="font-size: var(--font-size-xl); font-weight: 600; color: var(--accent-dark); margin-bottom: var(--space-3);">
+                Nigerian Products
+            </h3>
+            <p style="color: #6B7280; line-height: 1.6;">
+                Comprehensive database of local Nigerian products with NAFDAC numbers and complete ingredient lists.
+            </p>
+        </div>
+    </div>
+
+    <!-- Feature 3 -->
+    <div class="modern-card">
+        <div class="modern-card-body" style="text-align: center;">
+            <div style="width: 80px; height: 80px; background: rgba(16, 185, 129, 0.1); border-radius: var(--radius-xl); display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4) auto; color: var(--secondary-green); font-size: var(--font-size-3xl);">
+                <i class="fas fa-heart"></i>
+            </div>
+            <h3 style="font-size: var(--font-size-xl); font-weight: 600; color: var(--accent-dark); margin-bottom: var(--space-3);">
+                Health First
+            </h3>
+            <p style="color: #6B7280; line-height: 1.6;">
+                Access the latest health news and tips for managing allergies in the Nigerian context.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- How It Works Section -->
+<div class="modern-card" style="background: var(--background-light); border: none;">
+    <div class="modern-card-body" style="text-align: center; padding: var(--space-8);">
+        <h2 style="font-size: var(--font-size-3xl); font-weight: 700; color: var(--accent-dark); margin-bottom: var(--space-6);">
+            How Allergen Alert Works
+        </h2>
+        
+        <div class="modern-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-8);">
+            <!-- Step 1 -->
+            <div>
+                <div style="width: 60px; height: 60px; background: var(--secondary-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4) auto; color: var(--primary-white); font-size: var(--font-size-xl); font-weight: 700;">
+                    1
+                </div>
+                <h4 style="font-size: var(--font-size-lg); font-weight: 600; color: var(--accent-dark); margin-bottom: var(--space-2);">
+                    Register & Set Allergens
+                </h4>
+                <p style="color: #6B7280;">
+                    Create your account and select the allergens you need to avoid
+                </p>
+            </div>
+
+            <!-- Step 2 -->
+            <div>
+                <div style="width: 60px; height: 60px; background: var(--secondary-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4) auto; color: var(--primary-white); font-size: var(--font-size-xl); font-weight: 700;">
+                    2
+                </div>
+                <h4 style="font-size: var(--font-size-lg); font-weight: 600; color: var(--accent-dark); margin-bottom: var(--space-2);">
+                    Search Products
+                </h4>
+                <p style="color: #6B7280;">
+                    Look up any Nigerian product by name, NAFDAC number, or ingredient
+                </p>
+            </div>
+
+            <!-- Step 3 -->
+            <div>
+                <div style="width: 60px; height: 60px; background: var(--secondary-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto var(--space-4) auto; color: var(--primary-white); font-size: var(--font-size-xl); font-weight: 700;">
+                    3
+                </div>
+                <h4 style="font-size: var(--font-size-lg); font-weight: 600; color: var(--accent-dark); margin-bottom: var(--space-2);">
+                    Get Instant Alerts
+                </h4>
+                <p style="color: #6B7280;">
+                    Receive immediate warnings if a product contains your allergens
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+{% if not current_user.is_authenticated %}
+<div style="text-align: center; padding: var(--space-8) 0;">
+    <h2 style="font-size: var(--font-size-2xl); font-weight: 600; color: var(--accent-dark); margin-bottom: var(--space-4);">
+        Ready to Make Safer Food Choices?
+    </h2>
+    <p style="color: #6B7280; margin-bottom: var(--space-6); font-size: var(--font-size-lg);">
+        Join thousands of Nigerians who trust Allergen Alert for their food safety
+    </p>
+    <a href="{{ url_for('register') }}" class="modern-btn modern-btn-primary modern-btn-lg">
+        <i class="fas fa-rocket me-2"></i>Start Your Journey
+    </a>
+</div>
+{% endif %}
+
+{% endblock %}
