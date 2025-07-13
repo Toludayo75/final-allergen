@@ -13,6 +13,7 @@ class MultiCheckboxField(SelectMultipleField):
 class RegistrationForm(FlaskForm):
     """User registration form with allergen selection"""
     first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=50)])
+    email = StringField('Email', validators=[DataRequired(), Email()])  # ✅ Add this
     last_name = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=50)])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
     confirm_password = PasswordField('Confirm Password', 
