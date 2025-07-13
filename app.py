@@ -25,8 +25,7 @@ bcrypt = Bcrypt()
 csrf = CSRFProtect()
 
 def create_app():
-    # Create the app
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='static')
     
     # Configuration
     app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-production")
@@ -73,7 +72,9 @@ def create_app():
     return app
 
 # Create app instance
-app = create_app()
+def create_app():
+    app = Flask(__name__, static_folder='static')  # <--- updated line
+    ...
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
